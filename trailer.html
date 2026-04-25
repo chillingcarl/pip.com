@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIP SYSTEM — Trailer Unavailable</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .trailer-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 */
+      border: 2px solid var(--green);
+      box-shadow: var(--glow-strong), var(--pixel-shadow);
+      background: var(--green-panel);
+      overflow: hidden;
+    }
+
+    .video-placeholder {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      transition: background 0.2s;
+    }
+
+    .video-placeholder:hover { background: var(--bg); }
+
+    .play-icon {
+      font-family: var(--font-pixel);
+      font-size: 62px;
+      color: var(--green);
+      text-shadow: var(--glow-strong);
+      line-height: 1;
+      margin-bottom: 16px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+
+    .play-label {
+      font-family: var(--font-pixel);
+      font-size: 28px;
+      letter-spacing: 6px;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+
+    .play-sub {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--green-dim);
+      margin-top: 8px;
+    }
+
+    .corner-tl, .corner-tr, .corner-bl, .corner-br {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: var(--green);
+      border-style: solid;
+    }
+    .corner-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    .video-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: var(--border);
+      margin-bottom: 32px;
+    }
+
+    .video-meta-left { font-size: 11px; color: var(--green-dim); letter-spacing: 2px; }
+    .video-meta-right { font-size: 11px; color: var(--green-dim); letter-spacing: 2px; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .feature-box {
+      border: var(--border);
+      background: var(--green-panel);
+      padding: 20px;
+      transition: border-color 0.15s, transform 0.15s;
+      box-shadow: 4px 4px 0 #001a08;
+    }
+
+    .feature-box:hover { border-color: var(--green); transform: translate(-2px, -2px); }
+
+    .feature-icon {
+      font-family: var(--font-pixel);
+      font-size: 32px;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: var(--green-dim);
+      line-height: 1.6;
+    }
+
+    .video-status {
+      margin-top: 18px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">PIP<span>::</span>OS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="login.html">Character</a></li>
+    <li><a href="trailer.html">Trailer</a></li>
+    <li><a href="guide.html">Guide</a></li>
+    <li><a href="tree.html">Command Tree</a></li>
+  </ul>
+  <div class="nav-status"><span class="blink">█</span>&nbsp;<span id="nav-clock">SYS:00:00:00</span></div>
+</nav>
+
+<div class="page">
+  <div class="container">
+    <div class="trailer-wrap">
+
+      <div class="page-title">TRAILER STATUS</div>
+      <div class="page-subtitle">Pip RPG System — Official trailer not available yet</div>
+
+      <!-- Video -->
+      <div class="video-container">
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+
+        <div class="video-placeholder" id="video-placeholder">
+          <div class="play-icon">..</div>
+          <div class="play-label">NOT AVAILABLE YET</div>
+          <div class="play-sub">OFFICIAL TRAILER IS STILL IN PRODUCTION</div>
+          <div class="video-status">Release status: pending owner drop</div>
+        </div>
+      </div>
+
+      <!-- Meta bar -->
+      <div class="video-meta">
+        <div class="video-meta-left">PIP SYSTEM &nbsp;—&nbsp; TRAILER STATUS &nbsp;|&nbsp; 2026</div>
+        <div class="video-meta-right">
+          <span class="tag tag-amber">PENDING</span>
+          <span class="tag">DISCORD RPG</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="terminal-box" data-label="ABOUT THIS TRAILER">
+        <div class="terminal-box-inner" style="font-size:13px; color:var(--green-dim); line-height:1.8">
+          The official trailer is not available yet.
+          <br><br>
+          This page now works as a status board so visitors know a reveal is coming instead of landing on a placeholder video.
+          When the trailer is ready, this panel can be swapped back to an embed in one pass.
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="section-header" style="margin-top:40px">FEATURES SHOWN</div>
+
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon">MAP</div>
+          <div class="feature-title">Coming Soon</div>
+          <div class="feature-desc">The trailer page now clearly shows that no official reveal has been published yet.</div>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">PVP</div>
+          <div class="feature-title">Future Reveal</div>
+          <div class="feature-desc">Combat footage can be added later once you have the final trailer ready to drop.</div>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">XP+</div>
+          <div class="feature-title">Player Hype</div>
+          <div class="feature-desc">Visitors still get a polished page instead of a fake or broken video placeholder.</div>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">C$</div>
+          <div class="feature-title">Owner Controlled</div>
+          <div class="feature-desc">Trailer release timing stays in your hands until the official upload is ready.</div>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">RANK</div>
+          <div class="feature-title">Branded Status</div>
+          <div class="feature-desc">The unavailable state still matches the pixel-terminal style of the rest of the site.</div>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">GEAR</div>
+          <div class="feature-title">Ready To Swap</div>
+          <div class="feature-desc">When your video exists, this section can be turned back into a full trailer module quickly.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="footer">PIP SYSTEM &nbsp;|&nbsp; TRAILER NOT AVAILABLE YET</div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+<script src="js/easter.js"></script>
+</html>

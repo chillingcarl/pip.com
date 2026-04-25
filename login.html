@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIP SYSTEM — Character Creation</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── IMPORTANT: set this to your Cloudflare Worker URL ── */
+    /* See OAUTH_WORKER_URL in the <script> at the bottom     */
+
+    .login-wrap, .create-wrap, .profile-wrap { position: relative; }
+    .login-wrap { max-width: 520px; margin: 0 auto; padding: 40px 0; }
+
+    .login-wrap::before, .create-wrap::before, .profile-wrap::before {
+      content: ''; position: absolute; inset: 0;
+      border: 1px dashed rgba(0,255,65,0.18);
+      pointer-events: none; transform: translate(12px,12px);
+    }
+
+    .discord-btn {
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      width: 100%; padding: 18px;
+      background: #001a00; border: 2px solid var(--green);
+      color: var(--green); font-family: var(--font-pixel); font-size: 24px;
+      letter-spacing: 4px; cursor: pointer; text-transform: uppercase;
+      box-shadow: var(--glow); transition: all 0.2s; text-decoration: none;
+    }
+    .discord-btn:hover { background: var(--green); color: var(--bg); box-shadow: var(--glow-strong); }
+    .discord-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .discord-icon { width: 28px; height: 28px; fill: currentColor; flex-shrink: 0; }
+
+    .auth-log {
+      border: var(--border-dim); background: var(--bg);
+      padding: 12px 16px; height: 80px; overflow-y: auto;
+      font-size: 11px; color: var(--green-dim); margin-top: 16px;
+    }
+    .auth-log .log-line::before { content: '[LOG] '; color: var(--green-dim); }
+
+    /* ── Create screen ── */
+    #create-screen { display: none; }
+    .create-wrap { max-width: 900px; margin: 0 auto; padding: 20px 0 40px; }
+    .create-stage { border: var(--border); background: var(--green-panel); padding: 24px; box-shadow: var(--pixel-shadow); }
+    .gender-row { display: flex; gap: 16px; margin-bottom: 8px; }
+    .gender-btn { flex: 1; padding: 16px; font-size: 16px; letter-spacing: 3px; border: var(--border-dim); background: var(--bg); color: var(--green-dim); cursor: pointer; }
+    .gender-btn.selected { border-color: var(--green); background: var(--green-dark); color: var(--green); box-shadow: var(--glow); }
+    .form-group { margin-bottom: 24px; }
+    .preview-copy {
+      font-size: 12px; color: var(--green-dim); line-height: 1.8; margin-bottom: 24px;
+      padding: 16px 18px; border: var(--border);
+      background: linear-gradient(180deg,rgba(0,255,65,0.06),transparent), var(--green-panel);
+      box-shadow: 4px 4px 0 #001a08;
+    }
+    .preview-copy strong { color: var(--green); font-weight: normal; }
+    .confirm-section { margin-top: 32px; padding-top: 24px; border-top: var(--border-dim); }
+
+    /* ── Profile screen ── */
+    #profile-screen { display: none; }
+    .profile-wrap { max-width: 600px; margin: 0 auto; padding: 20px 0 40px; }
+    .character-card {
+      border: 2px solid var(--green); padding: 32px; text-align: center;
+      background: radial-gradient(circle at top,rgba(0,255,65,0.11),transparent 34%),
+        linear-gradient(180deg,rgba(0,255,65,0.08),transparent 45%), var(--bg2);
+      box-shadow: var(--glow-strong), 10px 10px 0 #001a08; position: relative;
+    }
+    .character-card::before {
+      content: 'CHARACTER FILE'; position: absolute; top: -11px; left: 50%;
+      transform: translateX(-50%); background: var(--bg); padding: 0 16px;
+      font-size: 11px; letter-spacing: 4px; color: var(--green);
+    }
+    .character-avatar {
+      width: 180px; height: 180px; border: var(--border);
+      margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+      background: var(--bg); box-shadow: inset 0 0 0 2px #06300f;
+      position: relative; overflow: hidden; border-radius: 0;
+    }
+    .character-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .character-avatar::before {
+      content: ''; position: absolute; inset: 12px;
+      border: 1px dashed rgba(0,255,65,0.14); pointer-events: none; z-index: 1;
+    }
+    .level-chip {
+      width: 118px; height: 118px; border: 2px solid var(--green);
+      background: linear-gradient(180deg,rgba(0,255,65,0.1),transparent), #061406;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 6px 6px 0 #001a08; text-transform: uppercase;
+    }
+    .level-chip strong { font-family: var(--font-pixel); font-size: 42px; line-height: 1; color: var(--green); text-shadow: var(--glow-strong); font-weight: normal; }
+    .level-chip span { margin-top: 8px; font-size: 11px; letter-spacing: 3px; color: var(--green-dim); }
+    .owner-pill { display: inline-block; margin-left: 10px; padding: 2px 8px; border: 1px solid var(--amber); color: var(--amber); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+    .success-msg { border: 1px solid var(--green); background: var(--green-ghost); padding: 16px; text-align: center; margin-bottom: 24px; font-family: var(--font-pixel); font-size: 22px; letter-spacing: 3px; color: var(--green); text-shadow: var(--glow); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">PIP<span>::</span>OS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="login.html">Character</a></li>
+    <li><a href="trailer.html">Trailer</a></li>
+    <li><a href="guide.html">Guide</a></li>
+    <li><a href="tree.html">Command Tree</a></li>
+  </ul>
+  <div class="nav-status"><span class="blink">█</span>&nbsp;<span id="nav-clock">SYS:00:00:00</span></div>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <!-- ══════════════════════════════════ LOGIN SCREEN -->
+    <div id="login-screen">
+      <div class="login-wrap">
+        <div class="page-title" style="font-size:42px;margin-bottom:6px">BEGIN YOUR JOURNEY</div>
+        <div class="page-subtitle">Connect your Discord to access the Pip portal</div>
+
+        <div class="terminal-box" data-label="AUTHENTICATION">
+          <div class="terminal-box-inner">
+            <div class="alert" style="margin-bottom:20px">
+              <strong>NOTICE:</strong> Login is handled through Discord only.
+              Your character identity stays anonymous after login.
+            </div>
+
+            <a class="discord-btn" id="discord-login-btn" href="#">
+              <svg class="discord-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.042.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.995a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+              </svg>
+              LOGIN WITH DISCORD
+            </a>
+
+            <div class="auth-log" id="auth-log">
+              <div class="log-line">AWAITING DISCORD AUTHENTICATION</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════ CHARACTER CREATE -->
+    <div id="create-screen">
+      <div class="create-wrap">
+        <div class="create-stage">
+          <div class="page-title" style="font-size:36px;margin-bottom:6px">CHARACTER CREATION</div>
+          <div class="page-subtitle">
+            Active file: <span id="username-display" style="color:var(--green)">—</span>
+            <span id="owner-pill" class="owner-pill" style="display:none">Owner Access</span>
+          </div>
+
+          <div class="alert" style="margin-bottom:24px">
+            Discord identity verified. Configure below to finalize your anonymous character file.
+          </div>
+
+          <div class="preview-copy">
+            <strong>Character Status:</strong> Portrait system disabled for now.
+            Your generated name, outfit seed, and level file still save normally.
+          </div>
+
+          <div class="terminal-box" data-label="STEP 01 — GENDER">
+            <div class="terminal-box-inner">
+              <div class="form-group" style="margin-bottom:0">
+                <span class="label">Select Gender</span>
+                <div class="gender-row" id="gender-select"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="confirm-section">
+            <button class="btn btn-primary" id="confirm-btn" disabled style="width:100%;display:block;text-align:center">
+              CONFIRM CHARACTER
+            </button>
+            <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--green-dim);letter-spacing:2px">
+              SELECTIONS CANNOT BE CHANGED AFTER CONFIRMATION
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════ PROFILE -->
+    <div id="profile-screen">
+      <div class="profile-wrap">
+        <div class="success-msg">CHARACTER SUCCESSFULLY CREATED</div>
+
+        <div class="character-card">
+          <div class="character-avatar" id="avatar-wrap">
+            <div class="level-chip" id="avatar-fallback">
+              <strong>1</strong><span>Level</span>
+            </div>
+          </div>
+
+          <div style="font-family:var(--font-pixel);font-size:28px;letter-spacing:4px;color:var(--green);text-shadow:var(--glow);margin-bottom:4px">
+            <span id="profile-username">—</span>
+          </div>
+          <div style="font-size:10px;letter-spacing:3px;color:var(--green-dim);margin-bottom:24px;text-transform:uppercase">
+            WANDERER — RANK F1
+          </div>
+
+          <div style="text-align:left;border-top:var(--border-dim);padding-top:20px">
+            <div class="stat-row"><span class="stat-key">Discord</span><span class="stat-val" id="profile-discord" style="font-size:16px">—</span></div>
+            <div class="stat-row"><span class="stat-key">Gender</span><span class="stat-val" id="profile-gender" style="font-size:18px">—</span></div>
+            <div class="stat-row"><span class="stat-key">Outfit</span><span class="stat-val" id="profile-outfit" style="font-size:15px">—</span></div>
+            <div class="stat-row"><span class="stat-key">Created</span><span class="stat-val" id="profile-created" style="font-size:16px">—</span></div>
+            <div class="stat-row"><span class="stat-key">Player ID</span><span class="stat-val" id="profile-id" style="font-size:14px;color:var(--green-dim)">—</span></div>
+            <div class="stat-row"><span class="stat-key">Level</span><span class="stat-val">1</span></div>
+            <div class="stat-row"><span class="stat-key">Coins (C)</span><span class="stat-val">0</span></div>
+            <div class="stat-row"><span class="stat-key">Shards (Cs)</span><span class="stat-val">0</span></div>
+            <div class="stat-row"><span class="stat-key">Area</span><span class="stat-val" style="font-size:16px">Wanderer's Crossing</span></div>
+          </div>
+
+          <div style="margin-top:24px;padding-top:20px;border-top:var(--border-dim);display:flex;gap:12px">
+            <a href="guide.html" class="btn" style="flex:1;text-align:center">View Guide</a>
+            <button class="btn" onclick="pipLogout()" style="flex:1">Logout</button>
+          </div>
+        </div>
+
+        <div class="alert" style="margin-top:20px;font-size:12px">
+          Your character is linked to your Discord account. Use <strong>.stats</strong> in any Pip server to view your in-game card.
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">PIP SYSTEM &nbsp;|&nbsp; CHARACTER MODULE</div>
+</div>
+
+<script src="js/main.js"></script>
+<script src="js/character.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════
+//  Discord OAuth wiring
+//  !! CHANGE THIS to your deployed Cloudflare Worker URL !!
+// ════════════════════════════════════════════════════════════
+const OAUTH_WORKER_URL = "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev";
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Wire the login button
+  const btn = document.getElementById("discord-login-btn");
+  if (btn) btn.href = OAUTH_WORKER_URL + "/login";
+
+  // Check if Discord redirected back here with user data in fragment
+  const hash = window.location.hash;
+  if (hash.startsWith("#discord_user=")) {
+    try {
+      const raw     = decodeURIComponent(hash.replace("#discord_user=", ""));
+      const discordUser = JSON.parse(raw);
+
+      // Clean the URL (remove the fragment so it doesn't stay in browser history)
+      history.replaceState(null, "", window.location.pathname);
+
+      logLine("DISCORD AUTH SUCCESSFUL");
+      logLine("USER: " + discordUser.username);
+
+      // Check if this user already has a character saved
+      const existing = PIP.SESSION.user;
+      if (existing && existing.id === discordUser.id && existing.characterCreated) {
+        // Merge Discord data into existing session (avatar may have updated)
+        existing.avatar   = discordUser.avatar;
+        existing.username = discordUser.username;
+        PIP.SESSION.user  = existing;
+        showCharacterProfile(existing);
+      } else {
+        // New login — save and go to creation screen
+        PIP.SESSION.user = discordUser;
+        showCreationPhase(discordUser);
+      }
+    } catch (e) {
+      logLine("ERROR PARSING DISCORD DATA");
+      console.error(e);
+    }
+  }
+});
+
+function logLine(text) {
+  const log = document.getElementById("auth-log");
+  if (!log) return;
+  const now = new Date();
+  const ts  = [now.getHours(), now.getMinutes(), now.getSeconds()]
+    .map(n => String(n).padStart(2, "0")).join(":");
+  const line = document.createElement("div");
+  line.className = "log-line";
+  line.textContent = `[${ts}]  ${text}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+window.pipLogout = function () {
+  PIP.SESSION.user = null;
+  window.location.href = OAUTH_WORKER_URL + "/logout";
+};
+</script>
+</body>
+<script src="js/easter.js"></script>
+</html>

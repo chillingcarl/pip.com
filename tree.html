@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIP SYSTEM — Command Tree</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Full-screen canvas layout */
+    .tree-page {
+      position: fixed;
+      top: 48px; left: 0;
+      width: 100vw;
+      height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at top, rgba(0, 255, 65, 0.08), transparent 24%),
+        linear-gradient(180deg, #010501 0%, #000000 55%, #021002 100%);
+    }
+
+    .tree-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 2px solid var(--green);
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.12), transparent 60%),
+        var(--green-panel);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      box-shadow: 0 6px 0 #001a08;
+    }
+
+    .tree-toolbar-title {
+      font-family: var(--font-pixel);
+      font-size: 24px;
+      color: var(--green);
+      text-shadow: var(--glow-strong);
+      letter-spacing: 6px;
+      margin-right: 8px;
+    }
+
+    .tree-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border: 2px solid #06300f;
+      background: rgba(0, 255, 65, 0.05);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--green-dim);
+      text-transform: uppercase;
+    }
+
+    .tree-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(0, 255, 65, 0.45);
+    }
+
+    .tool-sep {
+      width: 2px;
+      height: 28px;
+      background: #06300f;
+      margin: 0 4px;
+    }
+
+    .tool-btn {
+      padding: 7px 15px;
+      border: 2px solid var(--green);
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.08), transparent),
+        #031003;
+      color: var(--green-dim);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 4px 4px 0 #001a08;
+    }
+
+    .tool-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-ghost);
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 #001a08;
+    }
+
+    .zoom-display {
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 3px;
+      min-width: 70px;
+      padding: 6px 10px;
+      border: 2px solid #06300f;
+      background: rgba(0, 255, 65, 0.04);
+      text-align: center;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border: 2px solid;
+      box-shadow: 2px 2px 0 #001a08;
+    }
+
+    .legend-dot.root { border-color: #00ff41; background: #003300; }
+    .legend-dot.hub  { border-color: #6fff4f; background: #102b10; }
+    .legend-dot.cmd  { border-color: #1c8a2f; background: #061206; }
+
+    /* Canvas area */
+    .tree-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .tree-viewport {
+      flex: 1;
+      border: 2px solid var(--green);
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.04), transparent),
+        #031003;
+      box-shadow: 8px 8px 0 #001a08;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .viewport-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 2px solid #06300f;
+      background: rgba(0, 255, 65, 0.04);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green-dim);
+    }
+
+    .viewport-head strong {
+      color: var(--green);
+      font-weight: normal;
+    }
+
+    #tree-canvas {
+      flex: 1;
+      display: block;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    /* Info sidebar */
+    .tree-sidebar {
+      width: 300px;
+      border: 2px solid var(--green);
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.08), transparent 55%),
+        var(--green-panel);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 #001a08;
+    }
+
+    .sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 2px solid #06300f;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(0, 255, 65, 0.04);
+    }
+
+    #node-info {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .sidebar-section {
+      padding: 14px 16px;
+      border-bottom: 2px solid #06300f;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green-dim);
+      line-height: 1.8;
+    }
+
+    .sidebar-section strong {
+      color: var(--green);
+      font-weight: normal;
+    }
+
+    .sidebar-tips {
+      padding: 12px 16px;
+      border-top: 2px solid #06300f;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 2px;
+      line-height: 1.8;
+      text-transform: uppercase;
+    }
+
+    /* Tooltip */
+    #tree-tooltip {
+      position: fixed;
+      display: none;
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.08), transparent),
+        var(--bg2);
+      border: 2px solid var(--green);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--green-dim);
+      max-width: 240px;
+      pointer-events: none;
+      z-index: 100;
+      line-height: 1.5;
+      box-shadow: var(--glow), 6px 6px 0 #001a08;
+    }
+
+    #tree-tooltip strong { color: var(--green); display: block; margin-bottom: 4px; font-family: var(--font-pixel); font-size: 18px; }
+
+    /* Back link */
+    .back-link {
+      font-size: 11px;
+      color: var(--green-dim);
+      text-decoration: none;
+      letter-spacing: 2px;
+      transition: color 0.15s;
+      text-transform: uppercase;
+    }
+    .back-link:hover { color: var(--green); }
+
+    @media (max-width: 900px) {
+      .tree-main {
+        padding: 12px;
+      }
+      .tree-sidebar { display: none; }
+      .legend { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">PIP<span>::</span>OS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="login.html">Character</a></li>
+    <li><a href="trailer.html">Trailer</a></li>
+    <li><a href="guide.html">Guide</a></li>
+    <li><a href="tree.html">Command Tree</a></li>
+  </ul>
+  <div class="nav-status"><span class="blink">█</span>&nbsp;<span id="nav-clock">SYS:00:00:00</span></div>
+</nav>
+
+<!-- Full-screen tree layout -->
+<div class="tree-page">
+
+  <!-- Toolbar -->
+  <div class="tree-toolbar">
+    <span class="tree-toolbar-title">CMD TREE</span>
+    <span class="tree-status">Neural Map Online</span>
+    <div class="tool-sep"></div>
+    <button class="tool-btn" onclick="zoomIn()">ZOOM +</button>
+    <button class="tool-btn" onclick="zoomOut()">ZOOM −</button>
+    <button class="tool-btn" onclick="resetView()">RESET</button>
+    <span class="zoom-display" id="zoom-level">100%</span>
+    <div class="tool-sep"></div>
+    <a href="guide.html" class="back-link">← BACK TO GUIDE</a>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot root"></div> ROOT</div>
+      <div class="legend-item"><div class="legend-dot hub"></div> HUB</div>
+      <div class="legend-item"><div class="legend-dot cmd"></div> COMMAND</div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="tree-main">
+    <div class="tree-viewport">
+      <div class="viewport-head">
+        <span>Mode: <strong>Command Relation Grid</strong></span>
+        <span>Signal: <strong>Stable</strong></span>
+      </div>
+      <canvas id="tree-canvas"></canvas>
+    </div>
+
+    <!-- Info sidebar -->
+    <div class="tree-sidebar">
+      <div class="sidebar-header">NODE INFO</div>
+      <div class="sidebar-section">
+        Active shell: <strong>PIP::OS</strong><br>
+        View type: <strong>Hard Pixel Terminal</strong>
+      </div>
+      <div id="node-info">
+        <span class="text-dim">Click a node to inspect it.</span>
+      </div>
+      <div class="sidebar-tips">
+        DRAG &nbsp;→ Pan view<br>
+        SCROLL &nbsp;→ Zoom in/out<br>
+        CLICK NODE &nbsp;→ Inspect<br>
+        PINCH &nbsp;→ Zoom (touch)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Floating tooltip -->
+<div id="tree-tooltip"></div>
+
+<script src="js/main.js"></script>
+<script src="js/tree.js"></script>
+</body>
+<script src="js/easter.js"></script>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIP SYSTEM — Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 54px 26px 40px;
+      border: var(--border);
+      box-shadow: var(--pixel-shadow);
+      margin-bottom: 32px;
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(0, 255, 65, 0.12), transparent 55%),
+        var(--green-panel);
+    }
+
+    .hero-grid {
+      margin: 0 auto;
+      width: min(620px, 100%);
+      display: grid;
+      grid-template-columns: repeat(35, 1fr);
+      gap: 3px;
+    }
+
+    .hero-grid span {
+      aspect-ratio: 1;
+      background: rgba(0, 255, 65, 0.12);
+      border: 1px solid rgba(0, 255, 65, 0.08);
+    }
+
+    .hero-grid span.on {
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(0, 255, 65, 0.45);
+    }
+
+    .hero-grid span.amber {
+      background: #ffaa00;
+      box-shadow: 0 0 8px rgba(255, 170, 0, 0.45);
+    }
+
+    .hero-grid span.cyan {
+      background: #00ffff;
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.45);
+    }
+
+    .hero-grid span.red {
+      background: #ff5a5a;
+      box-shadow: 0 0 8px rgba(255, 90, 90, 0.4);
+    }
+
+    .hero-sub {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--green-dim);
+      text-transform: uppercase;
+      margin-top: 12px;
+    }
+
+    .hero-version {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      font-size: 10px;
+      color: var(--green-dim);
+      letter-spacing: 2px;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 24px;
+      padding: 12px 20px;
+      border: var(--border);
+      background: var(--green-panel);
+      margin-bottom: 32px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      overflow-x: auto;
+    }
+
+    .status-item { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .status-dot  { width: 6px; height: 6px; background: var(--green); box-shadow: var(--glow); animation: blink 2s ease-in-out infinite; }
+    .status-dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+    .news-grid { display: flex; flex-direction: column; gap: 0; }
+
+    .news-tag-new    { border-color: var(--green); color: var(--green); }
+    .news-tag-update { border-color: var(--amber); color: var(--amber); }
+    .news-tag-system { border-color: var(--cyan); color: var(--cyan); }
+
+    .boot-console {
+      border: var(--border);
+      background: var(--bg);
+      padding: 16px;
+      font-size: 11px;
+      color: var(--green-dim);
+      height: 120px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--pixel-shadow);
+    }
+
+    .log-line { line-height: 1.8; }
+    .log-line::before { content: '> '; color: var(--green); }
+
+    .pinned {
+      border-color: var(--amber) !important;
+      position: relative;
+    }
+    .pinned::after {
+      content: 'PINNED';
+      position: absolute;
+      top: -9px;
+      right: 12px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--amber);
+      border: 1px solid var(--amber);
+    }
+
+    .news-expand {
+      color: var(--green-dim);
+      font-size: 11px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      margin-top: 10px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .news-expand:hover { color: var(--green); }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .quick-link-stack a + a { margin-top: 10px; }
+
+    .owner-note {
+      font-size: 11px;
+      color: var(--green-dim);
+      line-height: 1.8;
+    }
+
+    .owner-note strong,
+    .owner-note a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .owner-note a:hover {
+      text-shadow: var(--glow);
+    }
+
+    .admin-panel {
+      display: none;
+    }
+
+    .admin-panel.visible {
+      display: block;
+    }
+
+    .admin-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 12px;
+    }
+
+    .admin-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .admin-help {
+      font-size: 11px;
+      color: var(--green-dim);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 900px) {
+      .admin-grid { grid-template-columns: 1fr; }
+    }
+
+    .main-content { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+
+    @media (max-width: 900px) {
+      .main-content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">PIP<span>::</span>OS</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="login.html">Character</a></li>
+    <li><a href="trailer.html">Trailer</a></li>
+    <li><a href="guide.html">Guide</a></li>
+    <li><a href="tree.html">Command Tree</a></li>
+  </ul>
+  <div class="nav-status">
+    <span class="blink">█</span>&nbsp;
+    <span id="nav-clock">SYS:00:00:00</span>
+  </div>
+</nav>
+
+<!-- ── Page ───────────────────────────────────────────────── -->
+<div class="page">
+  <div class="container">
+
+    <!-- Hero -->
+      <div class="hero">
+      <div class="hero-sub">Discord RPG System &nbsp;|&nbsp; v2.4.1 &nbsp;|&nbsp; Surface Layer Active</div>
+      <div class="hero-grid" id="hero-grid" aria-hidden="true"></div>
+      <div class="hero-version">BUILD 20260101</div>
+    </div>
+
+    <!-- Boot console -->
+    <div class="boot-console" id="boot-console">
+      <div class="log-line">SYSTEM INITIALISED</div>
+      <div class="log-line">LOADING PIP CORE MODULES...</div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-item">
+        <div class="status-dot"></div>
+        <span>BOT ONLINE</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot"></div>
+        <span>DATABASE CONNECTED</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot amber"></div>
+        <span>UNDERGROUND LAYER — IN DEVELOPMENT</span>
+      </div>
+      <div class="status-item">
+        <div class="status-dot"></div>
+        <span>AI FILTER ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="main-content">
+
+      <!-- News feed -->
+      <div>
+        <div class="section-header">NEWS</div>
+        <div class="news-grid" id="news-grid">
+
+          <!-- Pinned notice -->
+          <div class="news-item pinned">
+            <div class="news-date">2026.04.01</div>
+            <div class="news-title">Welcome to Pip OS</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-new">NEW</span>
+            </div>
+            <div class="news-body">
+              The official Pip website is now live. Commands, maps, ranks, and economy — all documented here.
+              Use <strong>.pip</strong> in your Discord server to open this portal directly from the bot.
+              Character creation is now available with a simplified level-based identity card.
+              Log in and begin your journey.
+            </div>
+            <a class="news-expand" href="login.html">→ Create your character</a>
+          </div>
+
+          <!-- Update 2 -->
+          <div class="news-item animate-in">
+            <div class="news-date">2026.03.18</div>
+            <div class="news-title">Underground Layer — Deployment Progress</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-update">UPDATE</span>
+            </div>
+            <div class="news-body">
+              A new map layer has been added to the world system. The Underground spans 21 areas
+              locked behind level gates starting at Level 35. Rare weapon requirements apply.
+              Scouts report hostile entities of significantly higher threat ratings.
+              Deploy teams at your own discretion. The layer will open server-side once the boss
+              gate at <strong>Crownfall Citadel</strong> is cleared.
+            </div>
+          </div>
+
+          <!-- Update 3 -->
+          <div class="news-item animate-in">
+            <div class="news-date">2026.03.05</div>
+            <div class="news-title">Adventure Rank System Deployed</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-new">NEW</span>
+            </div>
+            <div class="news-body">
+              The Rank system is now live. Ranks range from <strong>F1</strong> (Wanderer) to
+              <strong>SSS</strong> (The Eternal). Each rank requires a combination of combat wins,
+              exploration count, jobs completed, and rare drops. Use <strong>.rank</strong> to view
+              your current standing and <strong>.rankup</strong> to advance when requirements are met.
+            </div>
+          </div>
+
+          <!-- Update 4 -->
+          <div class="news-item animate-in">
+            <div class="news-date">2026.02.20</div>
+            <div class="news-title">World Map System — 3-Layer Navigation</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-system">SYSTEM</span>
+            </div>
+            <div class="news-body">
+              The interactive world map now supports three distinct layers: <strong>Surface</strong>,
+              <strong>Underground</strong>, and <strong>Aboveground</strong>. Each layer is unlocked
+              by reaching specific level thresholds. Travel between areas uses a step-based timer
+              system — 2 minutes per step distance. Open with <strong>.map</strong>.
+            </div>
+          </div>
+
+          <!-- Update 5 -->
+          <div class="news-item animate-in">
+            <div class="news-date">2026.02.01</div>
+            <div class="news-title">Economy Overhaul — Coin Caps &amp; Shard Conversion</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-update">UPDATE</span>
+            </div>
+            <div class="news-body">
+              The economy has been restructured. Coin holdings are now capped by player level
+              to prevent inflation. Shards (Cs) can be converted to Coins at a rate of 1:1000.
+              The Work system now tracks job history for rank requirements.
+              Daily coin cap increases with every 5 levels.
+            </div>
+          </div>
+
+          <!-- Update 6 -->
+          <div class="news-item animate-in">
+            <div class="news-date">2026.01.15</div>
+            <div class="news-title">Combat System v2 — Crit, Dodge, Weapon Bonuses</div>
+            <div style="margin-bottom:8px">
+              <span class="tag news-tag-update">UPDATE</span>
+            </div>
+            <div class="news-body">
+              Combat has been expanded. Players now have crit chance (scales with level, capped at 35%),
+              dodge chance (capped at 20%), and weapon damage bonuses. Combat simulation runs
+              up to 30 turns. Winners receive 200 C + 1 Cs. Weapon drop chance: 15% per fight win.
+              Cooldown: 5 minutes per fight.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+
+        <div class="terminal-box admin-panel" data-label="OWNER UPDATE CONSOLE" id="admin-panel">
+          <div class="terminal-box-inner">
+            <form class="admin-form" id="announcement-form">
+              <div class="admin-help">
+                Owner-only local editor for homepage announcements.
+                Sign in with <strong>mw2008g@gmail.com</strong> to use this build's update tools.
+                Announcements expire automatically after <strong>2 months</strong> and are removed permanently.
+              </div>
+              <input class="terminal-input" id="announcement-title" type="text" maxlength="70" placeholder="update title">
+              <div class="admin-grid">
+                <input class="terminal-input" id="announcement-date" type="text" placeholder="2026.04.21">
+                <select class="terminal-select" id="announcement-tag">
+                  <option value="NEW">NEW</option>
+                  <option value="UPDATE">UPDATE</option>
+                  <option value="SYSTEM">SYSTEM</option>
+                </select>
+              </div>
+              <textarea class="terminal-input admin-textarea" id="announcement-body" placeholder="write the announcement body here..."></textarea>
+              <button class="btn btn-primary" type="submit" style="width:100%">Publish Update</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="terminal-box" data-label="QUICK LINKS">
+          <div class="terminal-box-inner quick-link-stack">
+            <a href="login.html" class="btn" style="display:block; text-align:center; margin-bottom:10px">Create Character</a>
+            <a href="guide.html" class="btn" style="display:block; text-align:center; margin-bottom:10px">Command Guide</a>
+            <a href="tree.html"  class="btn" style="display:block; text-align:center; margin-bottom:10px">Command Tree</a>
+            <a href="trailer.html" class="btn" style="display:block; text-align:center">Trailer Status</a>
+          </div>
+        </div>
+
+        <div class="terminal-box" data-label="SYSTEM STATUS">
+          <div class="terminal-box-inner">
+            <div class="stat-row"><span class="stat-key">Version</span><span class="stat-val">2.4.1</span></div>
+            <div class="stat-row"><span class="stat-key">Layers</span><span class="stat-val">3</span></div>
+            <div class="stat-row"><span class="stat-key">Areas</span><span class="stat-val">56</span></div>
+            <div class="stat-row"><span class="stat-key">Weapons</span><span class="stat-val">∞</span></div>
+            <div class="stat-row"><span class="stat-key">Max Rank</span><span class="stat-val">SSS</span></div>
+            <div class="stat-row"><span class="stat-key">Max Level</span><span class="stat-val">220+</span></div>
+          </div>
+        </div>
+
+        <div class="terminal-box" data-label="LAYER STATUS">
+          <div class="terminal-box-inner">
+            <div class="stat-row">
+              <span class="stat-key">Surface</span>
+              <span class="tag tag-green">OPEN</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-key">Underground</span>
+              <span class="tag tag-amber">BETA</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-key">Aboveground</span>
+              <span class="tag tag-amber">BETA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal-box" data-label="DEVELOPER">
+          <div class="terminal-box-inner owner-note">
+            <div>Designed by <strong>@wa.11.im</strong></div>
+            <div>Update access: <strong>Owner only</strong></div>
+            <div>Owner email: <a href="mailto:mw2008g@gmail.com">mw2008g@gmail.com</a></div>
+            <div>Runtime: <strong>Discord.py</strong></div>
+            <div>DB: <strong>PostgreSQL</strong></div>
+          </div>
+        </div>
+
+        <div class="terminal-box" data-label="UPDATE ACCESS">
+          <div class="terminal-box-inner owner-note">
+            <div>News and developer updates are reserved for the owner account only.</div>
+            <div>Authorized contact: <strong>mw2008g@gmail.com</strong></div>
+            <div>Public viewers can read updates, but only the owner should edit and publish them.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    PIP SYSTEM &nbsp;|&nbsp; DESIGNED BY @WA.11.IM
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+  // Boot console animation
+  const bootLines = [
+    { text: 'KERNEL LOAD: SUCCESS', pause: 200 },
+    { text: 'CONNECTING TO DISCORD GATEWAY...', pause: 400 },
+    { text: 'GATEWAY: CONNECTED', pause: 150 },
+    { text: 'DATABASE: ONLINE', pause: 150 },
+    { text: 'AI FILTER: ACTIVE', pause: 150 },
+    { text: 'WORLD MAP: 3 LAYERS LOADED — 56 AREAS', pause: 200 },
+    { text: 'PIP SYSTEM READY', pause: 0 },
+  ];
+
+  const console = document.getElementById('boot-console');
+  console.innerHTML = '';
+  PIP.runBootSequence(bootLines, 'boot-console');
+
+  const OWNER_TAG_CLASS = {
+    NEW: 'news-tag-new',
+    UPDATE: 'news-tag-update',
+    SYSTEM: 'news-tag-system'
+  };
+
+  function createAnnouncementCard(item) {
+    const card = document.createElement('div');
+    card.className = 'news-item animate-in';
+    card.innerHTML = `
+      <div class="news-date">${item.date}</div>
+      <div class="news-title">${item.title}</div>
+      <div style="margin-bottom:8px">
+        <span class="tag ${OWNER_TAG_CLASS[item.tag] || 'news-tag-update'}">${item.tag}</span>
+      </div>
+      <div class="news-body">${item.body}</div>
+    `;
+    return card;
+  }
+
+  function renderOwnerAnnouncements() {
+    const grid = document.getElementById('news-grid');
+    if (!grid) return;
+
+    grid.querySelectorAll('[data-owner-announcement="true"]').forEach(node => node.remove());
+    const saved = PIP.DATA.announcements;
+    saved.slice().reverse().forEach(item => {
+      const card = createAnnouncementCard(item);
+      card.dataset.ownerAnnouncement = 'true';
+      grid.prepend(card);
+    });
+  }
+
+  function setupAdminPanel() {
+    const panel = document.getElementById('admin-panel');
+    const form = document.getElementById('announcement-form');
+    if (!panel || !form) return;
+
+    if (PIP.DATA.isOwner()) {
+      panel.classList.add('visible');
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!PIP.DATA.isOwner()) return;
+
+      const title = document.getElementById('announcement-title').value.trim();
+      const date = document.getElementById('announcement-date').value.trim() || new Date().toISOString().slice(0, 10).replace(/-/g, '.');
+      const tag = document.getElementById('announcement-tag').value;
+      const body = document.getElementById('announcement-body').value.trim();
+
+      if (!title || !body) return;
+
+      PIP.DATA.addAnnouncement({ title, date, tag, body, createdAt: PIP.nowIso() });
+      form.reset();
+      renderOwnerAnnouncements();
+    });
+  }
+
+  renderOwnerAnnouncements();
+  setupAdminPanel();
+
+  const HERO_WORDS = [
+    { text: 'QUEST', cls: 'on' },
+    { text: 'BETA', cls: 'amber' },
+    { text: 'LOGIN', cls: 'cyan' },
+    { text: 'NEWS', cls: 'red' },
+    { text: 'RPG', cls: 'on' }
+  ];
+
+  const HERO_FONT = {
+    R: [
+      '11110',
+      '10001',
+      '11110',
+      '10100',
+      '10010',
+      '10001'
+    ],
+    P: [
+      '11110',
+      '10001',
+      '11110',
+      '10000',
+      '10000',
+      '10000'
+    ],
+    G: [
+      '01111',
+      '10000',
+      '10111',
+      '10001',
+      '10001',
+      '01110'
+    ],
+    I: [
+      '11111',
+      '00100',
+      '00100',
+      '00100',
+      '00100',
+      '11111'
+    ],
+    B: [
+      '11110',
+      '10001',
+      '11110',
+      '10001',
+      '10001',
+      '11110'
+    ],
+    O: [
+      '01110',
+      '10001',
+      '10001',
+      '10001',
+      '10001',
+      '01110'
+    ],
+    T: [
+      '11111',
+      '00100',
+      '00100',
+      '00100',
+      '00100',
+      '00100'
+    ],
+    M: [
+      '10001',
+      '11011',
+      '10101',
+      '10001',
+      '10001',
+      '10001'
+    ],
+    A: [
+      '01110',
+      '10001',
+      '11111',
+      '10001',
+      '10001',
+      '10001'
+    ],
+    Q: [
+      '01110',
+      '10001',
+      '10001',
+      '10101',
+      '10010',
+      '01101'
+    ],
+    U: [
+      '10001',
+      '10001',
+      '10001',
+      '10001',
+      '10001',
+      '01110'
+    ],
+    E: [
+      '11111',
+      '10000',
+      '11110',
+      '10000',
+      '10000',
+      '11111'
+    ],
+    S: [
+      '01111',
+      '10000',
+      '01110',
+      '00001',
+      '00001',
+      '11110'
+    ],
+    L: [
+      '10000',
+      '10000',
+      '10000',
+      '10000',
+      '10000',
+      '11111'
+    ],
+    N: [
+      '10001',
+      '11001',
+      '10101',
+      '10011',
+      '10001',
+      '10001'
+    ],
+    W: [
+      '10001',
+      '10001',
+      '10101',
+      '10101',
+      '11011',
+      '10001'
+    ]
+  };
+
+  function drawHeroWord(word, cls) {
+    const grid = document.getElementById('hero-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const rows = 6;
+    const cols = 35;
+    const matrix = Array.from({ length: rows }, () => Array(cols).fill(''));
+    const letters = word.split('');
+    const letterWidth = 5;
+    const spacing = 1;
+    const wordWidth = letters.length * letterWidth + Math.max(letters.length - 1, 0) * spacing;
+    let offset = Math.max(0, Math.floor((cols - wordWidth) / 2));
+
+    letters.forEach(letter => {
+      const glyph = HERO_FONT[letter];
+      if (!glyph) return;
+      glyph.forEach((row, y) => {
+        row.split('').forEach((bit, x) => {
+          if (bit === '1' && y < rows && x + offset < cols) {
+            matrix[y][x + offset] = cls;
+          }
+        });
+      });
+      offset += letterWidth + spacing;
+    });
+
+    matrix.forEach(row => {
+      row.forEach(cellClass => {
+        const span = document.createElement('span');
+        if (cellClass) span.classList.add(cellClass);
+        grid.appendChild(span);
+      });
+    });
+  }
+
+  let heroIndex = 0;
+  drawHeroWord(HERO_WORDS[0].text, HERO_WORDS[0].cls);
+  setInterval(() => {
+    heroIndex = (heroIndex + 1) % HERO_WORDS.length;
+    const current = HERO_WORDS[heroIndex];
+    drawHeroWord(current.text, current.cls);
+  }, 1800);
+</script>
+</body>
+<script src="js/easter.js"></script>
+</html>
